@@ -11,6 +11,14 @@ from network_lib.package import PackageType
 from network_lib.utilities import pack_data, send_data, ExitException
 
 
+class BadCommand(Exception):
+    def __init__(self, value):
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 class Command:
     def __init__(self, args: List[str]):
         ...
@@ -73,13 +81,23 @@ class CommandController:
         }
 
     def parse_command(self, command: str) -> Command:
+        if len(command) == 0:
+            raise BadCommand(command)
         words = command.split()
         command = words[0]
         args = words[1:len(words)]
-        return self.__commands[command](args)
+        try:
+            return self.__commands[command](args)
+        except KeyError:
+            raise BadCommand(command)
 
     def run(self):
         while True:
             command = input(">> ")
-            command = self.parse_command(command)
-            command.execute()
+            if len(command) == 0:
+                continue
+            try:
+                command = self.parse_command(command)
+                command.execute()
+            except BadCommand:
+                print(f"Command '{command}' unrecognized")
