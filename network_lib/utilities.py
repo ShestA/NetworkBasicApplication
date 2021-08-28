@@ -7,6 +7,10 @@ from time import sleep
 from .package import Package, PackageType, MetaPackage
 
 
+class ExitException(Exception):
+    ...
+
+
 def delete_multiple_element(list_object, indices):
     indices = sorted(indices, reverse=True)
     for idx in indices:

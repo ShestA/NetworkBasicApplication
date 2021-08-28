@@ -65,6 +65,10 @@ class ClientHandler:
     def isFin(package) -> bool:
         return package.header.type == PackageType.FIN
 
+    @staticmethod
+    def isData(package) -> bool:
+        return package.header.type == PackageType.DATA
+
     def __handler__(self):
         try:
             while self.active is True:
@@ -74,6 +78,9 @@ class ClientHandler:
                 if self.isFin(packages[0]):
                     self.__good_bye__()
                     break
+                for package in packages:
+                    if self.isData(package):
+                        print(package.data.decode("utf-8"))
         except Exception:
             ...
 
