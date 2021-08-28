@@ -2,12 +2,12 @@ import logging
 import socket
 import sys
 import threading
-from random import randrange
 from typing import Union
 
-sys.path.append('../network_lib')
+sys.path.append('..')
 
-from utilities import get_data, pack_data, send_data, delete_multiple_element
+from network_lib.utilities import get_data, pack_data, send_data, get_packages, delete_multiple_element
+from network_lib.package import PackageType
 
 
 class Client:
@@ -44,59 +44,49 @@ class ClientHandler:
             self.handler_thread.join()
         del self.client
 
-    def __welcome_handshake__(self):
-        package = get_data(self.client.connection)
-        if package is None:
+    def __welcome_handshake__(self) -> Union[bool, None]:
+        packages = get_packages(self.client.connection, False)
+        if packages is None:
             return None
-        if package["DATA"] != "SYN":
+        if len(packages) != 1 or packages[0].header.type != PackageType.SYN:
             return None
-        ack = package["HEADER"]["SEQ"] + 1
-        seq = randrange(int("0xF0000000", 16)) + int("0x0FFFFFFF", 16)
-        package = pack_data("SYN-ACK", seq, ack)
-        if not send_data(self.client.connection, package):
-            logging.warning("Can't send message")
+        packages = pack_data(PackageType.SYN_ACK, bytearray("Welcome", "utf-8"))
+        corruptions = send_data(self.client.connection, packages, False)
+        if len(corruptions) != 0:
             return None
-        package = get_data(self.client.connection)
-        if package is None:
+        packages = get_packages(self.client.connection, False)
+        if packages is None:
             return None
-        if package["DATA"] == "ACK" and package["HEADER"]["ACK"] == seq + 1:
-            return True
-        return None
+        if len(packages) != 1 or packages[0].header.type != PackageType.ACK:
+            return None
+        return True
+
+    @staticmethod
+    def isFin(package) -> bool:
+        return package.header.type == PackageType.FIN
 
     def __handler__(self):
-        while self.active is True:
-            package = get_data(self.client.connection)
-            if package is None:
-                continue
-            if package["DATA"] == "FIN":
-                self.__good_bye__(package)
-                break
+        try:
+            while self.active is True:
+                packages = get_packages(self.client.connection, False)
+                if packages is None:
+                    continue
+                if self.isFin(packages[0]):
+                    self.__good_bye__()
+                    break
+        except Exception:
+            ...
 
-    def isAlive(self):
+    def isAlive(self) -> bool:
         return self.handler_thread.is_alive()
 
-    def id(self):
+    def id(self) -> int:
         return self.client.id
 
-    def __good_bye__(self, package):
+    def __good_bye__(self):
         self.active = False
-        ack = package["HEADER"]["FIN"] + 1
-        seq = randrange(int("0x00FFFFFF", 16)) + int("0xFF000000", 16)
-        package = pack_data("ACK", seq, ack)
-        if not send_data(self.client.connection, package):
-            # logging.warning("Can't send message")
-            return False
-        fin = randrange(int("0x00FFFFFF", 16)) + int("0xFF000000", 16)
-        package = pack_data("FIN", seq, ack, fin)
-        if not send_data(self.client.connection, package):
-            # logging.warning("Can't send message")
-            return False
-        package = get_data(self.client.connection)
-        if package is None:
-            return False
-        if package["DATA"] == "ACK":
-            return True
-        return False
+        packages = pack_data(PackageType.FIN, bytearray("Good bye", "utf-8"))
+        send_data(self.client.connection, packages, False)
 
 
 class Server:
@@ -131,9 +121,12 @@ class Server:
             delete_multiple_element(self.connections_handlers, dead_clients)
 
     def stop(self):
+        print("Stopping server...")
         self.active = False
+        self.connections_handlers.clear()
 
     def __del__(self):
-        print("Stopping server...")
-        self.connections_handlers.clear()
+        print("Close server...")
+        del self.connections_handlers
         self.master_socket.close()
+        print("Closed")
