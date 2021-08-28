@@ -1,2 +1,2 @@
-import utilities
-import package
+from . import utilities
+from . import package
