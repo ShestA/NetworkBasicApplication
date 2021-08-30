@@ -1,12 +1,9 @@
 import logging
 import socket
-import sys
 import threading
 from typing import Union
-
-sys.path.append('..')
-
-from network_lib.utilities import get_data, pack_data, send_data, get_packages, delete_multiple_element
+from common_lib.utilities import delete_multiple_element
+from network_lib.utilities import pack_data, send_data, get_packages
 from network_lib.package import PackageType
 
 

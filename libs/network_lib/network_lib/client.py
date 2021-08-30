@@ -1,13 +1,8 @@
 import socket
-import sys
 import logging
-from random import randrange
 from typing import Union
-
-sys.path.append('..')
-
-from network_lib.utilities import get_data, pack_data, send_data, get_packages
-from network_lib.package import PackageType
+from .utilities import pack_data, send_data, get_packages
+from .package import PackageType
 
 
 class Client:
@@ -32,6 +27,9 @@ class Client:
                 break
         if res is None:
             raise ConnectionError()
+
+    def disconnect(self):
+        ...
 
     def send(self, data: bytearray):
         packages = pack_data(PackageType.DATA, data)

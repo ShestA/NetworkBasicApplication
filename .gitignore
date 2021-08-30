@@ -1,7 +1,9 @@
-.DS_Store
-.idea
 __pycache__
 build
+env
+.idea
+*.egg-info
+.DS_Store
 dist
 *.log
 *.spec
