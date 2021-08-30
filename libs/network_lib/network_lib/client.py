@@ -1,30 +1,26 @@
 import socket
-import sys
 import logging
-from random import randrange
 from typing import Union
-
-sys.path.append('..')
-
-from network_lib.utilities import get_data, pack_data, send_data, get_packages
-from network_lib.package import PackageType
+from .utilities import pack_data, send_data, get_packages
+from .package import PackageType
 
 
 class Client:
     def __init__(self, username=""):
         logging.info("Starting client...")
-        self.__active = True
-        self.__master_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.__active = False
         self.__dest_address = None
 
     def connect(self, address, retries=100):
         if self.__dest_address is not None:
             raise FileExistsError("Connection already used")
-        self.__dest_address = address
         try:
-            self.__master_socket.connect(self.__dest_address)
+            self.__master_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.__master_socket.connect(address)
         except BlockingIOError:
             ...
+        self.__active = True
+        self.__dest_address = address
         res = None
         for _ in range(retries):
             res = self.__welcome_handshake__()
@@ -33,7 +29,10 @@ class Client:
         if res is None:
             raise ConnectionError()
 
+
     def send(self, data: bytearray):
+        if not self.__active:
+            raise FileExistsError("Connection not established")
         packages = pack_data(PackageType.DATA, data)
         corruptions = send_data(self.__master_socket, packages, False)
         if len(corruptions) != 0:
@@ -57,11 +56,14 @@ class Client:
             return None
         return True
 
-    def stop(self):
-        print("Stopping client...")
+    def disconnect(self):
+        if not self.__active:
+            raise FileExistsError("Connection not established")
+        self.__dest_address = None
         self.__active = False
         self.__good_bye__()
         self.__master_socket.close()
+        print("Disconnected")
 
     def __good_bye__(self):
         try:

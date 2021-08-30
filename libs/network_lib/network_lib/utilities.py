@@ -2,20 +2,7 @@ import socket
 from typing import Union, List
 from math import ceil
 from time import sleep
-# import logging
-
 from .package import Package, PackageType, MetaPackage
-
-
-class ExitException(Exception):
-    ...
-
-
-def delete_multiple_element(list_object, indices):
-    indices = sorted(indices, reverse=True)
-    for idx in indices:
-        if idx < len(list_object):
-            list_object.pop(idx)
 
 
 def pack_data(package_type: PackageType, data: bytearray, block_size=1024):
