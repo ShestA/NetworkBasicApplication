@@ -1,6 +1,6 @@
 from typing import List
 from common_lib.exceptions import ExitException
-from .command import Command
+from . import Command
 
 
 class ExitCommand(Command):

@@ -15,11 +15,11 @@ class Client:
     def connect(self, address, retries=100):
         if self.__dest_address is not None:
             raise FileExistsError("Connection already used")
-        self.__dest_address = address
         try:
-            self.__master_socket.connect(self.__dest_address)
+            self.__master_socket.connect(address)
         except BlockingIOError:
             ...
+        self.__dest_address = address
         res = None
         for _ in range(retries):
             res = self.__welcome_handshake__()

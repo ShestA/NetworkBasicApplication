@@ -1,10 +1,6 @@
 from functools import partial
 from network_lib.client import Client
-from commands.bad_command import BadCommand
-from commands.command import Command
-from commands.exit import ExitCommand
-from commands.send_string import SendString
-from commands.show_help import ShowHelp
+from commands import BadCommand, Command, ExitCommand, SendString, ShowHelp, Connect
 
 
 class CommandController:
@@ -14,19 +10,18 @@ class CommandController:
         self.__commands = {
             "exit": ExitCommand,
             "help": ShowHelp,
-            "send": partial(SendString, self.__client)
+            "send": partial(SendString, self.__client),
+            "connect": partial(Connect, self.__client)
         }
 
     def parse_command(self, command: str) -> Command:
-        if len(command) == 0:
-            raise BadCommand(command)
         words = command.split()
         command = words[0]
         args = words[1:len(words)]
         try:
             return self.__commands[command](args)
         except KeyError:
-            raise BadCommand(command)
+            raise BadCommand(f"Command {command} unrecognized")
 
     def run(self):
         while True:
@@ -37,4 +32,4 @@ class CommandController:
                 command = self.parse_command(command)
                 command.execute()
             except BadCommand as e:
-                print(f"Command {e} unrecognized")
+                print(e.value)

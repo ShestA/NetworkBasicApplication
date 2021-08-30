@@ -1,5 +1,5 @@
 from typing import List
-from .command import Command
+from . import Command
 from network_lib.client import Client
 
 
