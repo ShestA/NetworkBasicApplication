@@ -1,20 +1,21 @@
+from socket import gaierror
 from typing import List
+from . import BadCommand
 from . import Command
 from network_lib.client import Client
 
 
-class SendString(Command):
+class Disconnect(Command):
     def __init__(self, client: Client, args: List[str]):
         super().__init__(args)
-        self.__string = ' '.join(args)
         self.__client = client
 
     def execute(self):
         try:
-            self.__client.send(bytearray(self.__string, "utf-8"))
+            self.__client.disconnect()
         except FileExistsError as e:
             print(e)
 
     @staticmethod
     def help() -> str:
-        return "Send string:\n  send 'your_string'"
+        return "Disconnect:\n  disconnect"

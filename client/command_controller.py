@@ -1,6 +1,6 @@
 from functools import partial
 from network_lib.client import Client
-from commands import BadCommand, Command, ExitCommand, SendString, ShowHelp, Connect
+from commands import BadCommand, Command, ExitCommand, SendString, ShowHelp, Connect, Disconnect
 
 
 class CommandController:
@@ -11,7 +11,8 @@ class CommandController:
             "exit": ExitCommand,
             "help": ShowHelp,
             "send": partial(SendString, self.__client),
-            "connect": partial(Connect, self.__client)
+            "connect": partial(Connect, self.__client),
+            "disconnect": partial(Disconnect, self.__client),
         }
 
     def parse_command(self, command: str) -> Command:
