@@ -31,5 +31,4 @@ install:
   - conda info -a
   - conda env create --file environment.yml
   - conda activate NetworkBasicApplication
-  - python -m pip install .
   - make all
