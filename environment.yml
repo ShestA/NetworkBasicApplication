@@ -5,6 +5,7 @@ channels:
 dependencies:
   - altgraph=0.17=pyhd3eb1b0_0
   - arrow=1.1.1=pyhd8ed1ab_0
+  - attrs=21.2.0=pyhd3eb1b0_0
   - beautifulsoup4=4.9.3=pyha847dfd_0
   - binaryornot=0.4.4=py_1
   - brotlipy=0.7.0=py39h89e85a6_1001
@@ -25,6 +26,7 @@ dependencies:
   - gmp=6.2.1=h23ab428_2
   - icu=58.2=h0a44026_3
   - idna=3.1=pyhd3deb0d_0
+  - iniconfig=1.1.1=pyhd3eb1b0_0
   - jinja2=2.11.3=pyh44b312d_0
   - jinja2-time=0.2.0=py_2
   - libarchive=3.4.2=haa3ed63_0
@@ -36,19 +38,25 @@ dependencies:
   - lz4-c=1.9.3=h23ab428_1
   - macholib=1.14=pyhd3eb1b0_1
   - markupsafe=1.1.1=py39hcbf5805_3
+  - more-itertools=8.8.0=pyhd3eb1b0_0
   - ncurses=6.2=h0a44026_1
-  - openssl=1.1.1k=h9ed2024_0
+  - openssl=1.1.1l=h9ed2024_0
+  - packaging=21.0=pyhd3eb1b0_0
   - pip=21.2.4=py37hecd8cb5_0
   - pkginfo=1.7.1=py39hecd8cb5_0
+  - pluggy=0.13.1=py39hecd8cb5_0
   - poyo=0.5.0=py_0
   - psutil=5.8.0=py39h9ed2024_1
+  - py=1.10.0=pyhd3eb1b0_0
   - py-lief=0.10.1=py39h23ab428_1
   - pycosat=0.6.3=py39h9ed2024_0
   - pycparser=2.20=pyh9f0ad1d_2
   - pycryptodome=3.10.1=py39h659dea6_0
   - pyinstaller=3.6=py39h7bc2e8c_6
   - pyopenssl=20.0.1=pyhd8ed1ab_0
+  - pyparsing=2.4.7=pyhd3eb1b0_0
   - pysocks=1.7.1=py39h6e9494a_3
+  - pytest=6.2.4=py39hecd8cb5_2
   - python=3.9.6=h88f2d9e_1
   - python-dateutil=2.8.2=pyhd8ed1ab_0
   - python-libarchive-c=2.9=pyhd3eb1b0_1
@@ -66,6 +74,7 @@ dependencies:
   - sqlite=3.36.0=hce871da_0
   - text-unidecode=1.3=py_0
   - tk=8.6.10=hb0a8c7a_0
+  - toml=0.10.2=pyhd3eb1b0_0
   - tqdm=4.62.1=pyhd3eb1b0_1
   - typing_extensions=3.10.0.0=pyha770c72_0
   - tzdata=2021a=h5d7bf9c_0
@@ -78,8 +87,6 @@ dependencies:
   - zstd=1.4.9=h322a384_0
   - pip:
     - build==0.6.0.post1
-    - packaging==21.0
     - pep517==0.11.0
-    - pyparsing==2.4.7
     - tomli==1.2.1
-prefix: /Users/a.shestakov/PycharmProjects/NetworkBasicApplication/env
+prefix: /Users/a.shestakov/PycharmProjects/NetworkBasicApplication/env/envs/NetworkBasicApplication
