@@ -1,0 +1,34 @@
+language: python
+jobs:
+  include:
+    - name: "Ubuntu 20.04"
+      dist: focal
+      python: 3.9
+#    - name: "FreeBSD 12.1"
+#      os: freebsd
+#      python: 3.9
+#      language: python
+#    - name: "macOS 11.3"
+#      os: osx
+#      osx_image: xcode12.5
+#      python: 3.9
+#      language: shell
+#    - name: "Windows"
+#      os: windows
+#      language: shell
+#      before_install:
+#        - choco install python --version 3.9.0
+#        - python -m pip install --upgrade pip
+#      env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
+install:
+  - pip3 install --upgrade pip
+  - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+  - source "$HOME/miniconda/etc/profile.d/conda.sh"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - conda create -n NetworkBasicApplication --prefix $HOME/NetworkBasicApplication python=3.9
+  - conda activate NetworkBasicApplication
+  - python -m pip install .
+  - make all
