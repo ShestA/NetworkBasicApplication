@@ -29,7 +29,7 @@ install:
   - conda config --set always_yes yes --set changeps1 no
   - conda update -q conda
   - conda info -a
-  - conda create --file environment.yml
+  - conda env create --file environment.yml
   - conda activate NetworkBasicApplication
   - python -m pip install .
   - make all
