@@ -1,4 +1,4 @@
-name: base
+name: NetworkBasicApplication
 channels:
   - conda-forge
   - defaults
