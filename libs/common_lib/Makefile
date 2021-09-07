@@ -1,6 +1,6 @@
 all:
 	python3 setup.py build
-	python3 setup.py develop
+	python3 setup.py install
 .PHONY: all
 
 default_target: all
