@@ -12,13 +12,10 @@ network_lib:
 	cd $(NETWORK_LIB_PATH) && $(MAKE)
 .PHONY: network_lib
 
-libs:
-	common_lib
-	network_lib
+libs: common_lib network_lib
 .PHONY: libs
 
-all:
-	libs
+all: libs
 .PHONY: all
 
 default_target:
