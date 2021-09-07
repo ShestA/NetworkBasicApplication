@@ -1,19 +1,9 @@
-language: python
+language: shell
 jobs:
   include:
     - name: "Ubuntu 20.04"
       dist: focal
-      python: 3.9
-      before_install:
-        - pip3 install --upgrade pip
-        - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
-        - bash miniconda.sh -b -p $HOME/miniconda
-        - source "$HOME/miniconda/etc/profile.d/conda.sh"
-        - hash -r
-    - name: "FreeBSD 12.1"
-      os: freebsd
-      python: 3.9
-      language: python
+      python: 3.8
       before_install:
         - pip3 install --upgrade pip
         - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
@@ -23,11 +13,10 @@ jobs:
     - name: "macOS 11.3"
       os: osx
       osx_image: xcode12.5
-      python: 3.9
-      language: shell
+      python: 3.8
       before_install:
         - pip3 install --upgrade pip
-        - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+        - wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
         - bash miniconda.sh -b -p $HOME/miniconda
         - source "$HOME/miniconda/etc/profile.d/conda.sh"
         - hash -r
