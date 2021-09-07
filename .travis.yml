@@ -33,4 +33,4 @@ install:
   - conda activate NetworkBasicApplication
   - make all
 script:
-  pytest "$HOME/.ci"
+  pytest .ci
