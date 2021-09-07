@@ -32,3 +32,5 @@ install:
   - conda env create --file environment.yml
   - conda activate NetworkBasicApplication
   - make all
+script:
+  pytest "$HOME/.ci"

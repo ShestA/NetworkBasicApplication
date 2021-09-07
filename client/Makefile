@@ -1,5 +1,5 @@
 all:
-	pyinstaller -F main.py -n ClientApp
+	pyinstaller -F main.py -n ClientApp --distpath $HOME
 
 default_target:
 	all
