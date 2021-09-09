@@ -1,3 +1,5 @@
+![TravisCI](https://app.travis-ci.com/ShestA/NetworkBasicApplication.svg?branch=master)
+
 ### Conda environment:
 #### Activate environment from file:
 ```console
