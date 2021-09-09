@@ -33,6 +33,9 @@ install:
   - conda info -a
   - conda env create --file environment.yml
   - conda activate NetworkBasicApplication
+  - python3 -m pip install libs/common_lib
+  - python3 -m pip install libs/network_lib
   - make all
+
 script:
-  pytest .ci
+  pytest -rx --capture=no .ci

@@ -1,20 +1,61 @@
-import pytest
-from subprocess import Popen, PIPE, STDOUT
+import socket
+from typing import IO, Union, AnyStr
+from subprocess import Popen, PIPE
 import os
+import fcntl
 
 
-def test_connect_disconnect():
-    s_app = Popen([os.environ['HOME']+"/ServerApp"], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    c_app = Popen([os.environ['HOME']+"/ClientApp"], stdout=PIPE, stdin=PIPE, stderr=STDOUT)
-    grep_stdout = c_app.communicate(input=b'connect 127.0.0.1:8080')[0]
-    assert grep_stdout == "Server: Welcome"
-    c_app.communicate(input=b'send TEST_STRING')
-    assert s_app.stdout == "TEST_STRING"
-    grep_stdout = c_app.communicate(input=b'disconnect')[0]
-    assert grep_stdout == "Server: Good bye\nDisconnected"
-    grep_stdout = c_app.communicate(input=b'exit')[0]
-    assert grep_stdout == "Stopping\nCleaning up"
-    s_app.kill()
+def setNonBlocking(fd: IO[bytes]):
+    flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+    flags = flags | os.O_NONBLOCK
+    fcntl.fcntl(fd, fcntl.F_SETFL, flags)
+
+
+def capture_output(prefix: str, fd: int) -> Union[str, None]:
+    i = 0
+    while i < 10000:
+        i = i + 1
+        try:
+            captured_string = os.read(fd, 4096)
+            print(f"Captured {prefix}: ", captured_string)
+            return captured_string.decode("utf-8")
+        except socket.error:
+            ...
+    return None
+
+
+def check_output(fd: int, string: str):
+    response = os.read(fd, 1024)
+    assert string in response.decode("utf-8")
+
+
+def send_string_to_app(app: IO[AnyStr], string: str):
+    app.write(string.encode("utf-8"))
+    app.flush()
+
+
+def test_client_try_to_connect():
+    client_app = Popen(["python3", f"{os.getcwd()}/client/main.py"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    client_app_out = client_app.stdout.fileno()
+    client_app_in = client_app.stdin
+    check_output(client_app_out, "Startup")
+    send_string_to_app(client_app_in, "connect 127.0.0.1:8080\n")
+    check_output(client_app_out, "not available")
+    client_app.kill()
+
+
+def test_client_connect_disconnect():
+    server_app = Popen(["python3", f"{os.getcwd()}/server/main.py"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    client_app = Popen(["python3", f"{os.getcwd()}/client/main.py"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    client_app_out = client_app.stdout.fileno()
+    client_app_in = client_app.stdin
+    check_output(client_app_out, "Startup")
+    send_string_to_app(client_app_in, "connect 127.0.0.1:8080\n")
+    check_output(client_app_out, "Welcome")
+    send_string_to_app(client_app_in, "disconnect\n")
+    check_output(client_app_out, "Good bye\nDisconnected\n>>")
+    client_app.kill()
+    server_app.kill()
 
 
 def test_connect_send_disconnect():

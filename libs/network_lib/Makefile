@@ -1,6 +1,5 @@
 all:
-	python3 setup.py build
-	python3 setup.py install
+	python3 setup.py bdist --format=zip
 .PHONY: all
 
 default_target: all
