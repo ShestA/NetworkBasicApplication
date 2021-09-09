@@ -24,3 +24,13 @@ server: libs
 
 all: libs client server
 .PHONY: all
+
+clean:
+	find . -name __pycache__ -exec rm -rf {} \;
+	find . -name '*.spec' -exec rm -rf {} \;
+	find . -name dist -exec rm -rf {} \;
+	find . -name build -exec rm -rf {} \;
+	find . -name '*.egg-info' -exec rm -rf {} \;
+	find . -name '*.log' -exec rm -rf {} \;
+
+.PHONY: clean
