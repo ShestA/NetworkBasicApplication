@@ -1,5 +1,5 @@
 all:
-	pyinstaller -F main.py -n ServerApp
+	pyinstaller -F main.py -n ServerApp --distpath $(HOME) --onefile
 
 default_target:
 	all

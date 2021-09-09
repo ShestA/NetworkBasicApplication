@@ -1,0 +1,41 @@
+language: shell
+jobs:
+  include:
+    - name: "Ubuntu 20.04"
+      dist: focal
+      python: 3.8
+      before_install:
+        - pip3 install --upgrade pip
+        - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
+        - bash miniconda.sh -b -p $HOME/miniconda
+        - source "$HOME/miniconda/etc/profile.d/conda.sh"
+        - hash -r
+    - name: "macOS 11.3"
+      os: osx
+      osx_image: xcode12.5
+      python: 3.8
+      before_install:
+        - pip3 install --upgrade pip
+        - wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh
+        - bash miniconda.sh -b -p $HOME/miniconda
+        - source "$HOME/miniconda/etc/profile.d/conda.sh"
+        - hash -r
+#    - name: "Windows"
+#      os: windows
+#      language: shell
+#      before_install:
+#        - choco install python --version 3.9.0
+#        - python -m pip install --upgrade pip
+#      env: PATH=/c/Python39:/c/Python39/Scripts:$PATH
+install:
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - conda env create --file environment.yml
+  - conda activate NetworkBasicApplication
+  - python3 -m pip install libs/common_lib
+  - python3 -m pip install libs/network_lib
+  - make all
+
+script:
+  pytest -rx --capture=no .ci
