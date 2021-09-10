@@ -5,7 +5,7 @@ from time import sleep
 from .package import Package, PackageType, MetaPackage
 
 
-def pack_data(package_type: PackageType, data: bytearray, block_size=1024):
+def pack_data(package_type: PackageType, data: bytearray, destination=None, block_size=1024):
     block_number: int
     if len(data) != 0:
         blocks_number = ceil(len(data) / block_size)
@@ -15,7 +15,7 @@ def pack_data(package_type: PackageType, data: bytearray, block_size=1024):
     for block_number in range(blocks_number):
         begin = block_number * block_size
         end = (block_number + 1) * block_size
-        package = Package(package_type, block_number, False, blocks_number, data[begin:end])
+        package = Package(package_type, block_number, False, blocks_number, data[begin:end], destination)
         package = package.serialize()
         meta = MetaPackage(len(package))
         blocks.append({"meta": meta.raw, "general": package})
@@ -34,6 +34,9 @@ def receive_bytes(connection: socket, size: int, retries=10) -> Union[bytearray,
         except BlockingIOError:
             sleep(0.1)
             continue
+        except socket.timeout:
+            sleep(0.1)
+            continue
     raise ConnectionError
 
 
@@ -47,6 +50,8 @@ def send_bytes(connection: socket, data: bytes, retries=10):
         except BlockingIOError:
             sleep(0.1)
             continue
+        except OSError:
+            break
     return res
 
 
@@ -63,7 +68,7 @@ def confirm(connection: socket, package: Package, retries=10):
 
 
 def get_packages(connection: socket, confirmation=True, retries=10) -> Union[List[Package], None]:
-    packages: list[Package]
+    packages: List[Package]
     packages = []
     errors = 0
     while True:
