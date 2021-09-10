@@ -3,7 +3,7 @@ import threading
 from network_lib.client import Client
 
 from command_controller import CommandController
-from listener_handlers import GoodByeHandler
+from listener_handlers import GoodByeHandler, ReceiveDataHandler
 
 logging.basicConfig(filename='client.log', level=logging.DEBUG)
 
@@ -14,7 +14,9 @@ if __name__ == "__main__":
     name = input("What is Your name?\n")
     client = Client(name)
     runner = GoodByeHandler(client)
+    receiver = ReceiveDataHandler(client)
     client.registerHandler(runner)
+    client.registerHandler(receiver)
     controller = CommandController(client)
     controller.run(exit_event)
     try:

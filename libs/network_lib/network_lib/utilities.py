@@ -5,7 +5,7 @@ from time import sleep
 from .package import Package, PackageType, MetaPackage
 
 
-def pack_data(package_type: PackageType, data: bytearray, block_size=1024):
+def pack_data(package_type: PackageType, data: bytearray, destination=None, block_size=1024):
     block_number: int
     if len(data) != 0:
         blocks_number = ceil(len(data) / block_size)
@@ -15,7 +15,7 @@ def pack_data(package_type: PackageType, data: bytearray, block_size=1024):
     for block_number in range(blocks_number):
         begin = block_number * block_size
         end = (block_number + 1) * block_size
-        package = Package(package_type, block_number, False, blocks_number, data[begin:end])
+        package = Package(package_type, block_number, False, blocks_number, data[begin:end], destination)
         package = package.serialize()
         meta = MetaPackage(len(package))
         blocks.append({"meta": meta.raw, "general": package})

@@ -1,10 +1,11 @@
 import logging
 import socket
 import threading
-from typing import Union, List
-from common_lib.utilities import delete_multiple_element, retry
+from typing import Union, List, Dict
+from common_lib.utilities import retry
+from network_lib.client import IRequestHandler
 from network_lib.utilities import pack_data, send_data, get_packages
-from network_lib.package import PackageType, isFin, isData
+from network_lib.package import PackageType, isFin, isData, Package
 
 
 class Client:
@@ -37,18 +38,22 @@ class Client:
     def username(self, username: str):
         self.__username = username
 
+
 class ClientHandler:
     __active: bool
     __client: Client
     __listener_thread: threading.Thread
+    __handlers: List[IRequestHandler]
 
     def __init__(self, client: Client):
         self.__active = True
         self.__client = client
+        self.__handlers = []
 
-    def connect(self, retries):
+    def connect(self, retries) -> str:
         if retry(self.__welcome_handshake__, retries) is False:
             raise ConnectionError()
+        return self.__client.username
 
     def listen(self):
         self.__listener_thread = threading.Thread(target=self.__listen__)
@@ -56,11 +61,16 @@ class ClientHandler:
 
     def stop(self):
         self.__active = False
+
+    def join(self):
         if self.__listener_thread is not None:
             self.__listener_thread.join()
 
     def disconnect(self):
         self.__good_bye__()
+
+    def registerHandler(self, hdl: IRequestHandler):
+        self.__handlers.append(hdl)
 
     def __listen__(self):
         try:
@@ -71,14 +81,18 @@ class ClientHandler:
                     continue
                 if packages is None:
                     continue
-                if isFin(packages[0]):
-                    self.__good_bye__()
-                    break
-                for package in packages:
-                    if isData(package):
-                        print(package.data.decode("utf-8"))
+                for hdl in self.__handlers:
+                    hdl.handle(packages)
         except Exception as e:
             print(e)
+
+    def sendData(self, data: bytearray):
+        if not self.__active:
+            raise FileExistsError("Connection not established")
+        packages = pack_data(PackageType.DATA, data)
+        corruptions = send_data(self.__client.connection, packages, False)
+        if len(corruptions) != 0:
+            raise ConnectionError()
 
     def isAlive(self) -> bool:
         return self.__listener_thread.is_alive()
@@ -110,19 +124,54 @@ class ClientHandler:
         send_data(self.__client.connection, packages, False)
 
 
+class GoodByeHandler(IRequestHandler):
+    __client: ClientHandler
+
+    def __init__(self, client: ClientHandler):
+        self.__client = client
+
+    def handle(self, packages: List[Package]):
+        if isFin(packages[0]):
+            self.__client.stop()
+            self.__client.disconnect()
+
+
+class SendToClientMessageHandler(IRequestHandler):
+    __client: ClientHandler
+    __clients: Dict[str, ClientHandler]
+
+    def __init__(self, client: ClientHandler, clients: Dict[str, ClientHandler]):
+        self.__client = client
+        self.__clients = clients
+
+    def handle(self, packages: List[Package]):
+        if isData(packages[0]) and packages[0].header.destination is not None:
+            try:
+                data = bytearray()
+                for package in packages:
+                    data = data + package.data
+                self.__clients[packages[0].header.destination].sendData(data)
+            except KeyError:
+                ...
+
+
 class Server:
     __active: bool
     __acc_id: int
     __master_socket: socket
-    __clients_handlers: List[ClientHandler]
+    __clients_handlers: Dict[str, ClientHandler]
 
     def __init__(self, address: Union[tuple, str, bytes]):
         self.__active = True
         print("Starting server...")
         self.__acc_id = 0
         self.__master_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.__clients_handlers = []
-        self.__master_socket.bind(address)
+        self.__clients_handlers = {}
+        try:
+            self.__master_socket.bind(address)
+        except OSError as e:
+            print(e)
+            raise KeyboardInterrupt
         self.__master_socket.setblocking(False)
         self.__master_socket.listen(10)
         self.__master_socket.settimeout(0.3)
@@ -135,9 +184,11 @@ class Server:
                 connection.settimeout(0.3)
                 self.__acc_id = self.__acc_id + 1
                 client_handler = ClientHandler(Client(self.__acc_id, connection))
-                client_handler.connect(3)
+                client_handler.registerHandler(GoodByeHandler(client_handler))
+                client_handler.registerHandler(SendToClientMessageHandler(client_handler, self.__clients_handlers))
+                username = client_handler.connect(3)
                 client_handler.listen()
-                self.__clients_handlers.append(client_handler)
+                self.__clients_handlers[username] = client_handler
             except BlockingIOError:
                 ...
             except ConnectionError:
@@ -145,19 +196,20 @@ class Server:
             except socket.timeout:
                 ...
             dead_clients = []
-            for idx, connection in enumerate(self.__clients_handlers):
+            for key in self.__clients_handlers:
+                connection = self.__clients_handlers[key]
                 if not connection.isAlive():
-                    del connection
-                    dead_clients.append(idx)
-            delete_multiple_element(self.__clients_handlers, dead_clients)
+                    dead_clients.append(key)
+            for key in dead_clients:
+                del self.__clients_handlers[key]
 
     def stop(self):
         print("Stopping server...")
         self.__active = False
-        for client_handler in self.__clients_handlers:
-            client_handler.stop()
-            client_handler.disconnect()
-            del client_handler
+        for key in self.__clients_handlers:
+            self.__clients_handlers[key].stop()
+            self.__clients_handlers[key].join()
+            self.__clients_handlers[key].disconnect()
         self.__clients_handlers.clear()
 
     def __del__(self):

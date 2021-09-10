@@ -1,14 +1,11 @@
 import socket
 import logging
 from typing import Union, List
+
+from .request_handler_interface import IRequestHandler
 from .utilities import pack_data, send_data, get_packages
 from .package import PackageType, Package
 import threading
-
-
-class IRequestHandler:
-    def handle(self, packages: List[Package]):
-        ...
 
 
 class Client:
@@ -78,10 +75,10 @@ class Client:
             for hdl in self.__handlers:
                 hdl.handle(packages)
 
-    def send(self, data: bytearray):
+    def send(self, destination: str, data: bytearray):
         if not self.__active:
             raise FileExistsError("Connection not established")
-        packages = pack_data(PackageType.DATA, data)
+        packages = pack_data(PackageType.DATA, data, destination)
         corruptions = send_data(self.__master_socket, packages, False)
         if len(corruptions) != 0:
             raise ConnectionError()

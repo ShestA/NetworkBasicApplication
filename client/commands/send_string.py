@@ -9,8 +9,10 @@ class SendString(ICommand):
 
     def execute(self, args: List[str]):
         try:
+            username = args[0]
+            args = args[1:len(args)]
             string = ' '.join(args)
-            self.__client.send(bytearray(string, "utf-8"))
+            self.__client.send(username, bytearray(string, "utf-8"))
         except FileExistsError as e:
             print(e)
 

@@ -1,5 +1,6 @@
 import enum
 import pickle
+from typing import Union
 
 
 class PackageType(enum.Enum):
@@ -11,12 +12,13 @@ class PackageType(enum.Enum):
 
 
 class Header:
-    def __init__(self, package_type: PackageType, seq: int, ack: bool, fin: int, size: int):
+    def __init__(self, package_type: PackageType, seq: int, ack: bool, fin: int, size: int, destination: Union[str, None]):
         self.__type = package_type
         self.__seq = seq
         self.__ack = ack
         self.__fin = fin
         self.__size = size
+        self.__destination = destination
 
     def __del__(self):
         ...
@@ -65,6 +67,10 @@ class Header:
     def size(self):
         return self.__size
 
+    @property
+    def destination(self):
+        return self.__destination
+
 
 def __compress__(data: bytearray):
     return data
@@ -76,13 +82,13 @@ def __decompress__(data: bytearray):
 
 class Package:
 
-    def __init__(self, package_type: PackageType, seq: int, ack: bool, fin: int, data: bytearray, compress=True):
+    def __init__(self, package_type: PackageType, seq: int, ack: bool, fin: int, data: bytearray, destination, compress=True):
         self.__data: bytearray
         if compress:
             self.__data = __compress__(data)
         else:
             self.__data = data
-        self.__header = Header(package_type, seq, ack, fin, len(self.__data))
+        self.__header = Header(package_type, seq, ack, fin, len(self.__data), destination)
 
     def __del__(self):
         ...
@@ -95,7 +101,8 @@ class Package:
         seq = header.seq
         ack = header.ack
         fin = header.fin
-        return cls(type, seq, ack, fin, raw_data, False)
+        destination = header.destination
+        return cls(type, seq, ack, fin, raw_data, destination, False)
 
     @classmethod
     def fromRaw(cls, raw: bytes):
