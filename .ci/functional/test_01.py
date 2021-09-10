@@ -25,7 +25,7 @@ def capture_output(prefix: str, fd: int) -> Union[str, None]:
 
 
 def check_output(fd: int, string: str):
-    response = os.read(fd, 1024)
+    response = os.read(fd, 128)
     assert string in response.decode("utf-8")
 
 
@@ -39,6 +39,8 @@ def test_client_try_to_connect():
     client_app_out = client_app.stdout.fileno()
     client_app_in = client_app.stdin
     check_output(client_app_out, "Startup")
+    send_string_to_app(client_app_in, "Name#1\n")
+    check_output(client_app_out, ">>")
     send_string_to_app(client_app_in, "connect 127.0.0.1:8080\n")
     check_output(client_app_out, "not available")
     client_app.kill()
@@ -50,6 +52,8 @@ def test_client_connect_disconnect():
     client_app_out = client_app.stdout.fileno()
     client_app_in = client_app.stdin
     check_output(client_app_out, "Startup")
+    send_string_to_app(client_app_in, "Name#1\n")
+    check_output(client_app_out, ">>")
     send_string_to_app(client_app_in, "connect 127.0.0.1:8080\n")
     check_output(client_app_out, "Welcome")
     send_string_to_app(client_app_in, "disconnect\n")
