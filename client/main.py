@@ -9,7 +9,7 @@ logging.basicConfig(filename='client.log', level=logging.DEBUG)
 
 
 if __name__ == "__main__":
-    print("Startup")
+    print("Startup", flush=True)
     exit_event = threading.Event()
     name = input("What is Your name?\n")
     client = Client(name)
@@ -25,7 +25,7 @@ if __name__ == "__main__":
                 break
     except KeyboardInterrupt:
         ...
-    print("Cleaning up")
+    print("Cleaning up", flush=True)
     controller.stop()
     client.stop()
     client.join()

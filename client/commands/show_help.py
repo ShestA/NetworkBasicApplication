@@ -6,7 +6,7 @@ class ShowHelp(ICommand):
 
     def execute(self):
         for cls in ICommand.__subclasses__():
-            print(cls.help())
+            print(cls.help(), flush=True)
 
     @staticmethod
     def help() -> str:

@@ -73,13 +73,13 @@ class CommandController:
                     command.execute(args)
                     __for_command__()
                 except ExitException:
-                    print("Stopping")
+                    print("Stopping", flush=True)
                     self.__active = False
                     exit_event.set()
                     break
                 except BadCommand as e:
-                    print(e.value)
+                    print(e.value, flush=True)
                     __for_command__()
             except KeyboardInterrupt:
-                print("Stopping")
+                print("Stopping", flush=True)
                 break

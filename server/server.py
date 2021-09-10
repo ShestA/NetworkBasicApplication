@@ -84,7 +84,7 @@ class ClientHandler:
                 for hdl in self.__handlers:
                     hdl.handle(packages)
         except Exception as e:
-            print(e)
+            print(e, flush=True)
 
     def sendData(self, data: bytearray):
         if not self.__active:
@@ -163,14 +163,14 @@ class Server:
 
     def __init__(self, address: Union[tuple, str, bytes]):
         self.__active = True
-        print("Starting server...")
+        print("Starting server...", flush=True)
         self.__acc_id = 0
         self.__master_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__clients_handlers = {}
         try:
             self.__master_socket.bind(address)
         except OSError as e:
-            print(e)
+            print(e, flush=True)
             raise KeyboardInterrupt
         self.__master_socket.setblocking(False)
         self.__master_socket.listen(10)
@@ -204,7 +204,7 @@ class Server:
                 del self.__clients_handlers[key]
 
     def stop(self):
-        print("Stopping server...")
+        print("Stopping server...", flush=True)
         self.__active = False
         for key in self.__clients_handlers:
             self.__clients_handlers[key].stop()
@@ -213,7 +213,7 @@ class Server:
         self.__clients_handlers.clear()
 
     def __del__(self):
-        print("Close server...")
+        print("Close server...", flush=True)
         del self.__clients_handlers
         self.__master_socket.close()
-        print("Closed")
+        print("Closed", flush=True)

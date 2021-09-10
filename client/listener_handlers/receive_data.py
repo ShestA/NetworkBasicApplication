@@ -16,4 +16,4 @@ class ReceiveDataHandler(IRequestHandler):
             data = bytearray()
             for package in packages:
                 data = data + package.data
-            print(data.decode("utf-8"))
+            print(data.decode("utf-8"), flush=True)

@@ -14,7 +14,7 @@ class SendString(ICommand):
             string = ' '.join(args)
             self.__client.send(username, bytearray(string, "utf-8"))
         except FileExistsError as e:
-            print(e)
+            print(e, flush=True)
 
     @staticmethod
     def help() -> str:

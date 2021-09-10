@@ -68,7 +68,7 @@ class Client:
             except ConnectionError:
                 continue
             except Exception as e:
-                print(e)
+                print(e, flush=True)
                 break
             if packages is None:
                 continue
@@ -94,7 +94,7 @@ class Client:
         if packages[0].header.type != PackageType.SYN_ACK:
             return None
         welcome_message = packages[0].data.decode("utf-8")
-        print("Server:", welcome_message)
+        print("Server:", welcome_message, flush=True)
         packages = pack_data(PackageType.ACK, bytearray())
         corruptions = send_data(self.__master_socket, packages, False)
         if len(corruptions) != 0:
@@ -108,7 +108,7 @@ class Client:
         self.__good_bye__()
         self.__master_socket.close()
         self.__dest_address = None
-        print("Disconnected")
+        print("Disconnected", flush=True)
 
     def __good_bye__(self):
         try:
@@ -120,14 +120,14 @@ class Client:
             if packages is None:
                 return
             good_by_message = packages[0].data.decode("utf-8")
-            print("Server:", good_by_message)
+            print("Server:", good_by_message, flush=True)
             return
         except ConnectionRefusedError as e:
-            print(e.strerror)
+            print(e.strerror, flush=True)
             return
         except BrokenPipeError as e:
-            print(e.strerror)
+            print(e.strerror, flush=True)
             return
         except ConnectionError as e:
-            print(e.strerror)
+            print(e.strerror, flush=True)
             return

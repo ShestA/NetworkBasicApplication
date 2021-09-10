@@ -15,7 +15,7 @@ class Disconnect(ICommand):
             self.__client.join()
             self.__client.disconnect()
         except FileExistsError as e:
-            print(e)
+            print(e, flush=True)
 
     @staticmethod
     def help() -> str:
