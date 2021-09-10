@@ -151,3 +151,11 @@ class MetaPackage:
     @size.getter
     def size(self):
         return int.from_bytes(self.__size, "big")
+
+
+def isFin(package) -> bool:
+    return package.header.type == PackageType.FIN
+
+
+def isData(package) -> bool:
+    return package.header.type == PackageType.DATA

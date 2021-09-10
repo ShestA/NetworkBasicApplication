@@ -1,17 +1,18 @@
 from socket import gaierror
 from typing import List
 from . import BadCommand
-from . import Command
+from . import ICommand
 from network_lib.client import Client
 
 
-class Disconnect(Command):
-    def __init__(self, client: Client, args: List[str]):
-        super().__init__(args)
+class Disconnect(ICommand):
+    def __init__(self, client: Client):
         self.__client = client
 
-    def execute(self):
+    def execute(self, args: List[str]):
         try:
+            self.__client.stop()
+            self.__client.join()
             self.__client.disconnect()
         except FileExistsError as e:
             print(e)

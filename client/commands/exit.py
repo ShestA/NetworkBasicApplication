@@ -1,13 +1,21 @@
 from typing import List
 from common_lib.exceptions import ExitException
-from . import Command
+from network_lib.client import Client
+
+from . import ICommand
 
 
-class ExitCommand(Command):
-    def __init__(self, args: List[str]):
-        super().__init__(args)
+class ExitCommand(ICommand):
+    __client: Client
 
-    def execute(self):
+    def __init__(self, client: Client):
+        self.__client = client
+
+    def execute(self, args: List[str]):
+        try:
+            self.__client.disconnect()
+        except FileExistsError:
+            ...
         raise ExitException
 
     @staticmethod

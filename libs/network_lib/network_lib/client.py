@@ -1,21 +1,39 @@
 import socket
 import logging
-from typing import Union
+from typing import Union, List
 from .utilities import pack_data, send_data, get_packages
-from .package import PackageType
+from .package import PackageType, Package
+import threading
+
+
+class IRequestHandler:
+    def handle(self, packages: List[Package]):
+        ...
 
 
 class Client:
-    def __init__(self, username=""):
+    __username: str
+    __active: bool
+    __dest_address: Union[tuple, str, bytes, None]
+    __handlers: List[IRequestHandler]
+    __listener_thread: Union[threading.Thread, None]
+    __master_socket: socket
+
+    def __init__(self, username):
         logging.info("Starting client...")
+        self.__username = username
         self.__active = False
         self.__dest_address = None
+        self.__handlers = []
+        self.__listener_thread = None
 
-    def connect(self, address, retries=100):
+    def connect(self, address: Union[tuple, str, bytes], retries=100):
         if self.__dest_address is not None:
             raise FileExistsError("Connection already used")
         try:
             self.__master_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.__master_socket.setblocking(False)
+            self.__master_socket.settimeout(0.3)
             self.__master_socket.connect(address)
         except BlockingIOError:
             ...
@@ -29,6 +47,36 @@ class Client:
         if res is None:
             raise ConnectionError()
 
+    def isConnected(self):
+        return self.__dest_address is not None
+
+    def registerHandler(self, hdl: IRequestHandler):
+        self.__handlers.append(hdl)
+
+    def listen(self):
+        self.__listener_thread = threading.Thread(target=self.__listen__)
+        self.__listener_thread.start()
+
+    def stop(self):
+        self.__active = False
+
+    def join(self):
+        if self.__listener_thread is not None:
+            self.__listener_thread.join()
+
+    def __listen__(self):
+        while self.__active:
+            try:
+                packages = get_packages(self.__master_socket, False)
+            except ConnectionError:
+                continue
+            except Exception as e:
+                print(e)
+                break
+            if packages is None:
+                continue
+            for hdl in self.__handlers:
+                hdl.handle(packages)
 
     def send(self, data: bytearray):
         if not self.__active:
@@ -57,12 +105,12 @@ class Client:
         return True
 
     def disconnect(self):
-        if not self.__active:
-            raise FileExistsError("Connection not established")
-        self.__dest_address = None
-        self.__active = False
+        if self.__dest_address is None:
+            # raise FileExistsError("Connection not established")
+            return
         self.__good_bye__()
         self.__master_socket.close()
+        self.__dest_address = None
         print("Disconnected")
 
     def __good_bye__(self):
@@ -81,5 +129,8 @@ class Client:
             print(e.strerror)
             return
         except BrokenPipeError as e:
+            print(e.strerror)
+            return
+        except ConnectionError as e:
             print(e.strerror)
             return

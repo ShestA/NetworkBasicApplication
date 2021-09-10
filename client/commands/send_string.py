@@ -1,17 +1,16 @@
 from typing import List
-from . import Command
+from . import ICommand
 from network_lib.client import Client
 
 
-class SendString(Command):
-    def __init__(self, client: Client, args: List[str]):
-        super().__init__(args)
-        self.__string = ' '.join(args)
+class SendString(ICommand):
+    def __init__(self, client: Client):
         self.__client = client
 
-    def execute(self):
+    def execute(self, args: List[str]):
         try:
-            self.__client.send(bytearray(self.__string, "utf-8"))
+            string = ' '.join(args)
+            self.__client.send(bytearray(string, "utf-8"))
         except FileExistsError as e:
             print(e)
 

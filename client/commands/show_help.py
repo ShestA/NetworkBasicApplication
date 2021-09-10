@@ -1,13 +1,11 @@
 from typing import List
-from .command import Command
+from .command import ICommand
 
 
-class ShowHelp(Command):
-    def __init__(self, args: List[str]):
-        super().__init__(args)
+class ShowHelp(ICommand):
 
     def execute(self):
-        for cls in Command.__subclasses__():
+        for cls in ICommand.__subclasses__():
             print(cls.help())
 
     @staticmethod

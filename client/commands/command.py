@@ -1,11 +1,8 @@
 from typing import List
 
 
-class Command:
-    def __init__(self, args: List[str]):
-        ...
-
-    def execute(self):
+class ICommand:
+    def execute(self, args: List[str]):
         ...
 
     @staticmethod

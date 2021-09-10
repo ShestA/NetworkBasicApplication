@@ -34,6 +34,9 @@ def receive_bytes(connection: socket, size: int, retries=10) -> Union[bytearray,
         except BlockingIOError:
             sleep(0.1)
             continue
+        except socket.timeout:
+            sleep(0.1)
+            continue
     raise ConnectionError
 
 
@@ -47,6 +50,8 @@ def send_bytes(connection: socket, data: bytes, retries=10):
         except BlockingIOError:
             sleep(0.1)
             continue
+        except OSError:
+            break
     return res
 
 
@@ -63,7 +68,7 @@ def confirm(connection: socket, package: Package, retries=10):
 
 
 def get_packages(connection: socket, confirmation=True, retries=10) -> Union[List[Package], None]:
-    packages: list[Package]
+    packages: List[Package]
     packages = []
     errors = 0
     while True:
