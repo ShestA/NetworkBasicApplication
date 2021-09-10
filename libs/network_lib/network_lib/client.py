@@ -87,7 +87,7 @@ class Client:
             raise ConnectionError()
 
     def __welcome_handshake__(self) -> Union[bool, None]:
-        packages = pack_data(PackageType.SYN, bytearray())
+        packages = pack_data(PackageType.SYN, bytearray(self.__username, "utf-8"))
         corruptions = send_data(self.__master_socket, packages, False)
         if len(corruptions) != 0:
             return None

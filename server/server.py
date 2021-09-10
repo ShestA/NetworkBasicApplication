@@ -10,6 +10,7 @@ from network_lib.package import PackageType, isFin, isData
 class Client:
     __id: int
     __connection: socket
+    __username: str
 
     def __init__(self, id: int, connection: socket):
         self.__id = id
@@ -28,6 +29,13 @@ class Client:
     def id(self):
         return self.__id
 
+    @property
+    def username(self):
+        return self.__username
+
+    @username.setter
+    def username(self, username: str):
+        self.__username = username
 
 class ClientHandler:
     __active: bool
@@ -84,7 +92,8 @@ class ClientHandler:
             return None
         if len(packages) != 1 or packages[0].header.type != PackageType.SYN:
             return None
-        packages = pack_data(PackageType.SYN_ACK, bytearray("Welcome", "utf-8"))
+        self.__client.username = packages[0].data.decode("utf-8")
+        packages = pack_data(PackageType.SYN_ACK, bytearray("Welcome, " + self.__client.username, "utf-8"))
         corruptions = send_data(self.__client.connection, packages, False)
         if len(corruptions) != 0:
             return None
