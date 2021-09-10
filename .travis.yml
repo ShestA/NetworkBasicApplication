@@ -15,8 +15,6 @@ jobs:
       osx_image: xcode12.5
       python: 3.8
       before_install:
-        - /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        - brew install coreutils
         - export PATH=/usr/local/opt/coreutils/libexec/gnubin:$PATH
         - pip3 install --upgrade pip
         - wget https://repo.continuum.io/miniconda/Miniconda3-latest-MacOSX-x86_64.sh -O miniconda.sh

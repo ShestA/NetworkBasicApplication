@@ -39,7 +39,7 @@ def send_string_to_app(app: IO[AnyStr], string: str):
 
 
 def create_client(name: str):
-    client_app = Popen(["stdbuf", "-o0", "python3", f"{os.getcwd()}/client/main.py"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    client_app = Popen(["python3", f"{os.getcwd()}/client/main.py"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
     client_app_out = client_app.stdout.fileno()
     client_app_in = client_app.stdin
     check_output(client_app_out, "Startup")
@@ -64,17 +64,17 @@ def test_client_try_to_connect():
 
 
 def test_client_connect_disconnect():
-    server_app = Popen(["stdbuf", "-o0", "python3", f"{os.getcwd()}/server/main.py"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    server_app = Popen(["python3", f"{os.getcwd()}/server/main.py"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
     client_app, client_app_out, client_app_in = create_client("Name#1")
     connect_client(True, client_app_in, client_app_out)
     send_string_to_app(client_app_in, "disconnect\n")
-    check_output(client_app_out, "Good bye\nDisconnected\n>>")
+    check_output(client_app_out, "Server: Good bye\n")
     client_app.kill()
     server_app.kill()
 
 
 def test_connect_send_disconnect():
-    server_app = Popen(["stdbuf", "-o0", "python3", f"{os.getcwd()}/server/main.py"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
+    server_app = Popen(["python3", f"{os.getcwd()}/server/main.py"], stdout=PIPE, stdin=PIPE, stderr=PIPE)
     client_app_1, client_app_out_1, client_app_in_1 = create_client("Name#1")
     client_app_2, client_app_out_2, client_app_in_2 = create_client("Name#2")
     setNonBlocking(client_app_out_1)
